@@ -3,7 +3,7 @@
 //  script.name        = resizeArtboard.jsx;
 //  script.description = Resizes the artboards to a value entered by the user;
 //  script.required    = one document with at least one piece of art;
-//  script.parent      = Scott Lewis (iconifyit) based on shrinkABtoFitArt by carlos canto // 5/3/11;
+//  script.parent      = Iconfinder based on shrinkABtoFitArt by carlos canto // 5/3/11;
 //  script.elegant     = false;
  
 // todo: As items are added to the group, log them in a queue to be removed 
