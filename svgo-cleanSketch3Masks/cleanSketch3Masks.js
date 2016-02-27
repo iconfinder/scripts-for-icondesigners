@@ -9,9 +9,36 @@ exports.active = true;
 
 exports.description = 'Applies and removes Sketch3 masks';
 
-var applyTransforms = require('./_path.js').applyTransforms;
-var moveGroupAttrsToElems = require('./moveGroupAttrsToElems.js');
+exports.params = {
+    applyTransforms: true,
+    applyTransformsStroked: true,
+    makeArcs: {
+        threshold: 2.5, // coefficient of rounding error
+        tolerance: 0.5  // percentage of radius
+    },
+    straightCurves: true,
+    lineShorthands: false,
+    curveSmoothShorthands: true,
+    floatPrecision: 3,
+    transformPrecision: 5,
+    removeUseless: true,
+    collapseRepeated: true,
+    utilizeAbsolute: true,
+    leadingZero: true,
+    negativeExtraSpace: true
+};
 
+// var applyTransforms = require('./_path.js').applyTransforms;
+// var moveGroupAttrsToElems = require('./moveGroupAttrsToElems.js');
+
+var collections = require('./_collections.js'),
+    pathElems = collections.pathElems.concat(['g', 'text']),
+    referencesProps = collections.referencesProps,
+    path2js = require('./_path.js').path2js,
+    js2path = require('./_path.js').js2path,
+    applyTransforms = require('./_path.js').applyTransforms,
+    convertPathData = require('./convertPathData.js');
+    
 /**
  * Apply and remove Sketch3 mask transforms:
  * -
@@ -193,6 +220,110 @@ exports.fn = function(data) {
     };
     
     /**
+     * Maps a function - fn - to all elements in a collection
+     * - 
+     * @param {Object} the root object to begin applying the function
+     * @param {Function} the function to call on every element in the collection
+     * @param {Boolean} whether or not to display errors
+     * @return void
+     */
+    function map(items, fn, silent) {
+        if (!items.content) return;
+        items.content.forEach(function(item) {
+            try {
+                fn(item);
+            }
+            catch(e){
+                if (! silent) {
+                    console.error(e);
+                }
+            }
+            if (item.content) {
+                map(item, fn, silent);
+            }
+        });
+    };
+    
+    /**
+     * Moves group attributes to child elements
+     * -
+     * @param {Object} the object to potentially move attrs 
+     * @return void
+     */
+     function move_group_attrs_to_elems(item) {
+        // move group transform attr to content's pathElems
+        if (
+            item.isElem('g') &&
+            item.hasAttr('transform') &&
+            !item.isEmpty() 
+        ) {
+            item.content.forEach(function(inner) {
+                if (inner.hasAttr('transform')) {
+                    inner.attr('transform').value = item.attr('transform').value + ' ' + inner.attr('transform').value;
+                } else {
+                    inner.addAttr(item.attr('transform'));
+                }
+            });
+            item.removeAttr('transform');
+        }
+    };
+    
+    /**
+     * Flattens groups with only a single path to just the path
+     * -
+     * @param {Object} the data node to start with
+     * @return void
+     */
+    function flatten_groups(items) {
+    
+        if (! items.content) return;
+        items.content.forEach(function(item) {
+            if (item.isElem('g')) {
+                console.info("Found a group");
+                //console.info(item);
+                if (item.content.length == 2) {
+                    if (item.content[1].elem == 'path') {
+                        console.info("Replacing group with path");
+                        for (var key in item.content[1]) {
+                            item[key] = item.content[1][key];
+                        }
+                        item.content[1].elem = false;
+                    }
+                }
+            } 
+            if (item.content) {
+                flatten_groups(item);
+            }
+        });
+    };
+    
+    /**
+     * Applies the convertPathData plugin on our data objects
+     * -
+     * @param {Object} the data node to start with
+     * @return void
+     */
+    function do_transforms(items) {
+        items.content.forEach(function(item) {
+            try {
+                convertPathData.fn(item, exports.params);
+            }
+            catch(e) {
+                console.error(e);
+            }
+            if (item.content) {
+                do_transforms(item);
+            }
+        });
+    };
+    
+    
+    // main
+    
+    //TODO: How well this is working and the benefits of this step are still unclear. At the very least, there do not appear to be any negative side effects.
+    map(data, move_group_attrs_to_elems);
+     
+    /**
      * Collect all path IDs for paths with masks and corresponding mask path IDs
      */
     collect_masks(data);
@@ -210,7 +341,15 @@ exports.fn = function(data) {
     /**
      * Remove the empty 'defs' tag
      */
-    remove_empty_nodes(data, 'defs');
+    remove_empty_nodes(data, ['defs']);
+    
+    /**
+     * Apply tranformations
+     */
+    //TODO: This is not quite working
+    //do_transforms(data);
+
+    // flatten_groups(data);
     
     return data;
 };
