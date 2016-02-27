@@ -23,10 +23,6 @@ Since this script is not stand-alone but a plugin for SVGO, there are no instruc
 
 https://github.com/svg/svgo#how-to-use
 
-### Batch Processing Files
-
-Will add later...
-
 ### Known Issues
 
 - [active] Masks that are compound paths are not being applied correctly. This has something to do with applying the transformations on path elements but to-date they are not fixed.
