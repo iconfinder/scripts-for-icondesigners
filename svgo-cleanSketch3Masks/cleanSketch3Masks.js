@@ -9,7 +9,6 @@ exports.active = true;
 
 exports.description = 'Applies and removes Sketch3 masks';
 
-
 var applyTransforms = require('./_path.js').applyTransforms;
 var moveGroupAttrsToElems = require('./moveGroupAttrsToElems.js');
 
@@ -61,11 +60,9 @@ exports.fn = function(data) {
                             xhref = get_xhref(mask);
                             
                             if (xhref != "undefined") {
-                                
                                 xhref = xhref.replace("#", "");
                             }
                             masks.push({'id': id, 'mask': xhref});
-                            
                         }
                     }
                 }
@@ -108,7 +105,6 @@ exports.fn = function(data) {
         }
         return result;
     };
-    
     
     /**
      * Gets the xhref value for the path mask
