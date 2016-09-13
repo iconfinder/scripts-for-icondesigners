@@ -5,10 +5,6 @@ Icon Contact Sheet
 
 2016 Iconfinder.com - http://iconfinder.com
 
-## Author
-
-Scott Lewis <scott@iconfinder>
-
 ## Date
 
 September 13, 2016

@@ -4,9 +4,8 @@ var originalInteractionLevel = userInteractionLevel;
 userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
 
 /**
-*  @copyright   Iconfinder.com
- * @author      Scott Lewis <scott@iconfinder.com>
- * @date        2016-08-07
+*  @author   Iconfinder.com - http://iconfinder.com
+ * @date        2016-09-13
  *
  *  Installation: 
  *
