@@ -43,7 +43,7 @@ Top & Bottom Margins = (Page Height - Row HeightRow Count) / 2
 
 Copyright:
 
-(c) copyright: Scott Lewis (scott@iconify.it) http://iconify.it
+(c) Copyright: Iconfinder.com - http://iconfinder.com
 
 Copyright full text can be found in the accompanying file license.txt
 
