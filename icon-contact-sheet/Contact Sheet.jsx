@@ -4,8 +4,9 @@ var originalInteractionLevel = userInteractionLevel;
 userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
 
 /**
- * @author  Scott Lewis <scott@iconify.it>
- * @date    2016-08-07
+*  @copyright   Iconfinder.com
+ * @author      Scott Lewis <scott@iconfinder.com>
+ * @date        2016-08-07
  *
  *  Installation: 
  *
@@ -36,7 +37,7 @@ userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
  *
  *  Copyright:
  *
- *      (c) copyright: Scott Lewis (scott@iconify.it) http://iconify.it
+ *      (c) copyright: Iconfinder.com - http://iconfinder.com
  *      copyright full text can be found in the accompanying file license.txt
  */
  
@@ -62,8 +63,7 @@ var CONFIG = {
     
     SHRINK_TO_FIT: true,
     
-//     START_FOLDER: "~/github/iconify/quatro-icons/12-free-icons/svg",
-    START_FOLDER: "/Users/scott/Dropbox (Personal)/000-iconify-products/collections/quatro",
+    START_FOLDER: "~/Desktop",
     
     LOGGING: true,
     
