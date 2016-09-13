@@ -4,6 +4,7 @@ Icon Contact Sheet
 ## Credit
 
 Scott Lewis <scott@iconify.it>
+
 September 13, 2016
 
 
