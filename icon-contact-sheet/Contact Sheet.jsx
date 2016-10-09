@@ -40,38 +40,154 @@ userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
  *      copyright full text can be found in the accompanying file license.txt
  */
  
-var CONFIG = {
-    ROWS: 12,
-    COLS: 10,
-    VOFF: 20,
-    HOFF: 20,
-    FRM_WIDTH: 100,
-    FRM_HEIGHT: 100,
-    ROW_HEIGHT: 100,
-    COL_WIDTH: 100,
-    PG_WIDTH: 800,
-    PG_HEIGHT: 1200,
-    PG_UNITS: "px",
-    GUTTER: 0,
-    SCALE: 100,
-   
-    LOG_FILE_PATH: "~/Desktop/ai-contactsheet-log.txt",
+var LANG = {
     CHOOSE_FOLDER: "Please choose your Folder of files to place…",
     NO_SELECTION: "No selection",
-    LAYER_NOT_CREATED: "Could not create layer. ",
+    LABEL_CONTACT_SHEET_SETTINGS: "Contact Sheet Settings",
+    LABEL_PG_WIDTH: "Page Width:",
+    LABEL_PG_HEIGHT: "Page Height:",
+    LABEL_COL_COUNT: "Column Count:",
+    LABEL_ROW_COUNT: "Row Count:",
+    LABEL_SCALE: "Scale:",
+    LABEL_FILE_NAME: "File Name:",
+    LABEL_LOGGING: "Logging?",
+    BUTTON_CANCEL: "Cancel",
+    BUTTON_OK: "Ok",
+    DOES_NOT_EXIST: " does not exist",
+    LAYER_NOT_CREATED: "Could not create layer. "
+}
+
+var CONFIG = {
+
+    /**
+     * Number of rows
+     */
+    
+    ROWS: 20,
+    
+    /**
+     * Number of columns
+     */
+    
+    COLS: 10,
+    
+    /**
+     * Top & bottom page margins 
+     */
+    
+    VOFF: 64,
+    
+    /**
+     * Left & Right page margins
+     */
+     
+    HOFF: 64,
+    
+    /**
+     * Row height. This is set programmatically.
+     */
+     
+    ROW_WIDTH: 128,
+    
+    /**
+     * Column Height. This is set programmatically.
+     */
+     
+    COL_WIDTH: 128,
+    
+    /**
+     * @deprecated
+     */
+    FRM_WIDTH: 128,
+    
+    /**
+     * @deprecated
+     */
+    FRM_HEIGHT: 128,
+    
+    /**
+     * Artboard width
+     * 
+     * 10 columns 128 px wide, with 64 px page margins
+     */
+    
+    PG_WIDTH: 1408, // 792, // 1060,
+    
+    /**
+     * Artboard height
+     *
+     * 20 rows 128 px tall, with 64 px page margins
+     */
+    
+    PG_HEIGHT: 2688, // 1300, // 6000,
+    
+    /**
+     * Not yet fully-implemented. Will support multiple units
+     */
+    
+    PG_UNITS: "px",
+    
+    /**
+     * @deprecated
+     */
+    
+    GUTTER: 0,
+    
+    /**
+     * Enter scale in percentage 1-100
+     */
+    
+    SCALE: 100,
+    
+    /**
+     * Illustrator version compatibility
+     */
     
     AIFORMAT: Compatibility.ILLUSTRATOR10,
     
+    /**
+     * If the icon is larger than the cell size, shrink it to the cell size
+     */
+     
     SHRINK_TO_FIT: true,
     
-    START_FOLDER: "~/Desktop",
+//     START_FOLDER: "~/github/iconify/quatro-icons/12-free-icons/svg",
+    START_FOLDER: "/Users/scott/Dropbox (Personal)/000-iconify-products/collections/quatro",
+//     START_FOLDER: "/Users/scott/Dropbox (Personal)/000-iconify-products/collections",
     
+    /**
+     * The contact sheet file name
+     */
+     
     FILENAME: "contact-sheet",
     
+    /**
+     * Enable logging?
+     */
+     
     LOGGING: true,
+       
+    /**
+     * Log file location
+     */
+     
+    LOG_FILE_PATH: "~/Desktop/ai-contactsheet-log.txt",
     
+    /**
+     * Verbose logging output?
+     */
+    DEBUG: true,
+        
+    /**
+     * @deprecated
+     */
+     
     SKIP_COLS: 0, 
-    DEBUG: false,
+    
+    /**
+     * Not fully-implemented
+     */
+     
     STRIP: ["svg", "ai", "eps", "txt", "pdf"]
 }
 
@@ -79,56 +195,56 @@ var CONFIG = {
  * Displays the settings dialog
  *
  * Inputs:
- *	- skip columns
- *	- page width
- *	- page height
- *	- cell width
- *	- cell height
- *	- scale
- *	- logging enabled
- *	
- *	- number of cols        = divide page width by cell width
- *	- number of rows        = divide page height by cell height
- *	- side margins          = (page width - (col count * col width))/2
- *	- top/bottom margins    = (page height - (row count * row width))/2
+ *    - skip columns
+ *    - page width
+ *    - page height
+ *    - cell width
+ *    - cell height
+ *    - scale
+ *    - logging enabled
+ *    
+ *    - number of cols        = divide page width by cell width
+ *    - number of rows        = divide page height by cell height
+ *    - side margins          = (page width - (col count * col width))/2
+ *    - top/bottom margins    = (page height - (row count * row width))/2
  *
  * @return Settings object
  */
 function doDisplayDialog() { 
 
-	var dialog = new Window("dialog", "Contact Sheet Settings", [550, 350, 900, 700]); 
-	var response = false;
-	
-	try {
-        dialog.pageWidthLabel       = dialog.add("statictext", [32, 30, 132, 60], "Page Width:");
+    var dialog = new Window("dialog", LANG.LABEL_CONTACT_SHEET_SETTINGS, [550, 350, 900, 700]); 
+    var response = false;
+    
+    try {
+        dialog.pageWidthLabel       = dialog.add("statictext", [32, 30, 132, 60], LANG.LABEL_PG_WIDTH);
         dialog.pageWidth            = dialog.add("edittext", [150, 30, 200, 60], CONFIG.PG_WIDTH); 
         dialog.pageWidth.active     = true;
     
-        dialog.pageHeightLabel      = dialog.add("statictext", [32, 70, 132, 100], "Page Height:");
+        dialog.pageHeightLabel      = dialog.add("statictext", [32, 70, 132, 100], LANG.LABEL_PG_HEIGHT);
         dialog.pageHeight           = dialog.add("edittext", [150, 70, 200, 100], CONFIG.PG_HEIGHT); 
         dialog.pageHeight.active    = true;
+        
+        dialog.colsLabel            = dialog.add("statictext", [32, 110, 132, 140], LANG.LABEL_COL_COUNT);
+        dialog.cols                 = dialog.add("edittext", [150, 110, 200, 140], CONFIG.COLS); 
+        dialog.cols.active          = true;
     
-        dialog.colWidthLabel        = dialog.add("statictext", [32, 110, 132, 140], "Column Width:");
-        dialog.colWidth             = dialog.add("edittext", [150, 110, 200, 140], CONFIG.COL_WIDTH); 
-        dialog.colWidth.active      = true;
+        dialog.rowsLabel            = dialog.add("statictext", [32, 150, 132, 180], LANG.LABEL_ROW_COUNT);
+        dialog.rows                 = dialog.add("edittext", [150, 150, 200, 180], CONFIG.ROWS); 
+        dialog.rows.active          = true;
     
-        dialog.rowHeightLabel       = dialog.add("statictext", [32, 150, 132, 180], "Row Height:");
-        dialog.rowHeight            = dialog.add("edittext", [150, 150, 200, 180], CONFIG.ROW_HEIGHT); 
-        dialog.rowHeight.active     = true;
-    
-        dialog.scaleLabel           = dialog.add("statictext", [32, 190, 132, 220], "Scale:");
+        dialog.scaleLabel           = dialog.add("statictext", [32, 190, 132, 220], LANG.LABEL_SCALE);
         dialog.scale                = dialog.add("edittext", [150, 190, 200, 220], CONFIG.SCALE); 
         dialog.scale.active         = true;
         
-        dialog.filenameLabel        = dialog.add("statictext", [32, 230, 132, 260], "File Name:");
+        dialog.filenameLabel        = dialog.add("statictext", [32, 230, 132, 260], LANG.LABEL_FILE_NAME);
         dialog.filename             = dialog.add("edittext", [150, 230, 320, 260], CONFIG.FILENAME); 
         dialog.filename.active      = true;
     
-        dialog.logging              = dialog.add('checkbox', [32, 270, 132, 340], "Logging?");
+        dialog.logging              = dialog.add('checkbox', [32, 270, 132, 340], LANG.LABEL_LOGGING);
         dialog.logging.value        = CONFIG.LOGGING;
 
-        dialog.cancelBtn            = dialog.add("button", [80,300,170,330], "Cancel", {name:"cancel"});
-        dialog.openBtn              = dialog.add("button", [180,300,270,330], "Ok", {name:"ok"});
+        dialog.cancelBtn            = dialog.add("button", [80,300,170,330], LANG.BUTTON_CANCEL, {name:"cancel"});
+        dialog.openBtn              = dialog.add("button", [180,300,270,330], LANG.BUTTON_OK, {name:"ok"});
     
         dialog.cancelBtn.onClick = function() { 
             dialog.close();
@@ -140,16 +256,16 @@ function doDisplayDialog() {
 
             CONFIG.PG_WIDTH     = parseInt(dialog.pageWidth.text); 
             CONFIG.PG_HEIGHT    = parseInt(dialog.pageHeight.text); 
-            CONFIG.COL_WIDTH    = parseInt(dialog.colWidth.text);
-            CONFIG.ROW_HEIGHT   = parseInt(dialog.rowHeight.text);
-            CONFIG.FRM_WIDTH    = CONFIG.COL_WIDTH;
-            CONFIG.FRM_HEIGHT   = CONFIG.ROW_HEIGHT;
             CONFIG.LOGGING      = dialog.logging.value;
             CONFIG.SCALE        = parseInt(dialog.scale.text);
-            CONFIG.ROWS         = Math.floor(CONFIG.PG_HEIGHT / CONFIG.ROW_HEIGHT);
-            CONFIG.COLS         = Math.floor(CONFIG.PG_WIDTH / CONFIG.COL_WIDTH);
-            CONFIG.HOFF         = Math.floor((CONFIG.PG_WIDTH - (CONFIG.COLS * CONFIG.COL_WIDTH))/2);
-            CONFIG.VOFF         = CONFIG.HOFF;
+            
+            CONFIG.COLS         = parseInt(dialog.cols.text);  
+            CONFIG.ROWS         = parseInt(dialog.rows.text); 
+            
+            CONFIG.COL_WIDTH    = parseInt((CONFIG.PG_WIDTH - (CONFIG.HOFF * 2)) / CONFIG.COLS);
+            CONFIG.ROW_HEIGHT   = parseInt((CONFIG.PG_HEIGHT - (CONFIG.VOFF * 2)) / CONFIG.ROWS);
+            CONFIG.FRM_WIDTH    = CONFIG.COL_WIDTH;
+            CONFIG.FRM_HEIGHT   = CONFIG.ROW_HEIGHT;
             
             if (CONFIG.DEBUG) {
                 logger("CONFIG.PG_WIDTH: " + CONFIG.PG_WIDTH);
@@ -170,11 +286,11 @@ function doDisplayDialog() {
             return true;
         };
         dialog.show();
-	}
-	catch(ex) {
-	    logger(ex);
-	    alert(ex);
-	}
+    }
+    catch(ex) {
+        logger(ex);
+        alert(ex);
+    }
     return response;
 }
 
@@ -210,7 +326,7 @@ function doCreateContactSheet() {
     
     var saveCompositeFile = false;
 
-    srcFolder = Folder.selectDialog(CONFIG.CHOOSE_FOLDER, CONFIG.START_FOLDER);
+    srcFolder = Folder.selectDialog(LANG.CHOOSE_FOLDER, CONFIG.START_FOLDER);
 
     if (srcFolder != null) {  
     
@@ -336,7 +452,7 @@ function doCreateContactSheet() {
                                         theLayer.name = f.name;
                                     }
                                     catch(ex) {
-                                        logger(CONFIG.LAYER_NOT_CREATED + ex);
+                                        logger(LANG.LAYER_NOT_CREATED + ex);
                                     }
                                     svgFile = doc.groupItems.createFromFile(f); 
                             
@@ -372,7 +488,7 @@ function doCreateContactSheet() {
                                     }                            
                                 }
                                 else {
-                                    logger(svgFileList[i] + " does not exist");
+                                    logger(svgFileList[i] + LANG.DOES_NOT_EXIT);
                                 }
                             }
                             catch(ex) {
@@ -479,7 +595,7 @@ function alignToNearestPixel(sel) {
     try {
         if (typeof sel != "object") {
         
-            logger(CONFIG.NO_SELECTION);
+            logger(LANG.NO_SELECTION);
         } 
         else {
         
