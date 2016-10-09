@@ -71,3 +71,4 @@ You will need to relaunch Adobe Illustrator after installing the script.
 * 2016-09-13 - The script currently only supports folders nested one level deep (need to add recursive folder support)
 * 2016-09-13 - No progress bar
 * 2016-09-13 - The script is admittedly slow but this is a result of the technology, not the code
+* 2016-10-09 - Currently Mac-centric. Need to detect OS and change path notation accordingly.
