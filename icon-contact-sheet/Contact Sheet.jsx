@@ -111,7 +111,7 @@ var CONFIG = {
      * 10 columns 128 px wide, with 64 px page margins
      */
     
-    PG_WIDTH: 1408, // 792, // 1060,
+    PG_WIDTH: 1408,
     
     /**
      * Artboard height
@@ -119,7 +119,7 @@ var CONFIG = {
      * 20 rows 128 px tall, with 64 px page margins
      */
     
-    PG_HEIGHT: 2688, // 1300, // 6000,
+    PG_HEIGHT: 2688,
     
     /**
      * Not yet fully-implemented. Will support multiple units
@@ -151,9 +151,11 @@ var CONFIG = {
      
     SHRINK_TO_FIT: true,
     
-//     START_FOLDER: "~/github/iconify/quatro-icons/12-free-icons/svg",
-    START_FOLDER: "/Users/scott/Dropbox (Personal)/000-iconify-products/collections/quatro",
-//     START_FOLDER: "/Users/scott/Dropbox (Personal)/000-iconify-products/collections",
+    /**
+     * Start folder for selection
+     */
+     
+    START_FOLDER: "~/Desktop",
     
     /**
      * The contact sheet file name
