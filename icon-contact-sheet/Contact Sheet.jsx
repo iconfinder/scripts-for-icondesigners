@@ -24,7 +24,7 @@
  */
 
 /**
- * @author  Scott Lewis <scott@iconfinder.com>
+ * @author  Iconfinder <support@iconfinder.com>
  * @date    2017-02-04
  *
  *  Installation:
