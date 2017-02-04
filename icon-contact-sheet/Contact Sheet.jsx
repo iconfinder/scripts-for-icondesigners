@@ -1,196 +1,385 @@
-#target Illustrator  
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2017 Iconfinder
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+
+/**
+ * @author  Scott Lewis <scott@iconfinder.com>
+ * @date    2017-02-04
+ *
+ *  Installation:
+ *
+ *      1. Copy this file to Illustrator > Presets > Scripting
+ *      2. Restart Adobe Illustrator
+ *      3. Go to File > Scripts > Contact Sheet
+ *      4. Follow the prompts
+ *
+ *  Usage:
+ *
+ *      This script will create a contact sheet of vector objects from a folder structure
+ *      that you specify. The resulting contact sheet will have margins that are calculated
+ *      thus: subtracting Left & Right Margins = (Page Width - Column Width * Column Count) / 2
+ *      Top & Bottom Margins = (Page Height - Row Height * Row Count) / 2
+ */
+
+#target Illustrator
 
 var originalInteractionLevel = userInteractionLevel;
 userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
 
 /**
-*  @author  Iconfinder.com - http://iconfinder.com
- * @date    2016-09-13
- *
- *  Installation: 
- *
- *  1. Copy this file to Illustrator > Presets > Scripting
- *  2. Restart Adobe Illustrator
- *  3. Go to File > Scripts > Contact Sheet
- *  4. Follow the prompts
- *
- *  Usage:
- *
- *  This script will create a contact sheet of vector objects from a folder structure 
- *  that you specify. As of 13-09-2016 the script will only work with folder structures 
- *  nested 1 level deep (Parent > Subfolders). This was done intentionally to allow 
- *  for creating contacts sheets of categorized icons where the user wants to 
- *  be able to specify the order of the categories.
- *
- *  Inputs:
- *
- *      Page Width:     The width of the contact sheet in pixels
- *      Page Height:    The height of the contact sheet in pixels
- *      Column Width:   The width of the columns in pixels
- *      Row Height:     The height of the rows in pixels
- *      Scale:          The percentage (100 = 100%) to scale the objects being placed
- *
- *  The resulting contact sheet will have margins that are calculated thus: subtracting
- *  Left & Right Margins = (Page Width - Column Width * Column Count) / 2
- *  Top & Bottom Margins = (Page Height - Row Height * Row Count) / 2
- *
- *  Copyright:
- *
- *      (c) copyright: Iconfinder.com - http://iconfinder.com
- *      copyright full text can be found in the accompanying file license.txt
+ * Global strings object.
+ * @type {{
+ *     LABEL_DIALOG_WINDOW : string,
+ *     NO_SELECTION        : string,
+ *     LABEL_PG_WIDTH      : int,
+ *     LABEL_PG_HEIGHT     : int,
+ *     LABEL_COL_COUNT     : int,
+ *     LABEL_ROW_COUNT     : int,
+ *     LABEL_SCALE         : number,
+ *     LABEL_FILE_NAME     : string,
+ *     LABEL_LOGGING       : boolean,
+ *     BUTTON_CANCEL       : string,
+ *     BUTTON_OK           : string,
+ *     DOES_NOT_EXIST      : string,
+ *     LAYER_NOT_CREATED   : string,
+ *     LABEL_SRC_FOLDER    : string,
+ *     LABEL_CHOOSE_FOLDER : string,
+ *     LABEL_INPUT         : string,
+ *     LABEL_SIZE          : string,
+ *     LABEL_OUTPUT        : string
+ * }}
  */
- 
 var LANG = {
-    CHOOSE_FOLDER: "Please choose your Folder of files to place…",
-    NO_SELECTION: "No selection",
-    LABEL_CONTACT_SHEET_SETTINGS: "Contact Sheet Settings",
-    LABEL_PG_WIDTH: "Page Width:",
-    LABEL_PG_HEIGHT: "Page Height:",
-    LABEL_COL_COUNT: "Column Count:",
-    LABEL_ROW_COUNT: "Row Count:",
-    LABEL_SCALE: "Scale:",
-    LABEL_FILE_NAME: "File Name:",
-    LABEL_LOGGING: "Logging?",
-    BUTTON_CANCEL: "Cancel",
-    BUTTON_OK: "Ok",
-    DOES_NOT_EXIST: " does not exist",
-    LAYER_NOT_CREATED: "Could not create layer. "
-}
+    /**
+     * Dialog window label
+     */
 
+    LABEL_DIALOG_WINDOW: "Please choose a folder of SVG files.",
+
+    /**
+     * No selection error string.
+     */
+
+    NO_SELECTION: "No selection",
+
+    /**
+     * Page width field label.
+     */
+
+    LABEL_PG_WIDTH: "Page Width:",
+
+    /**
+     * Page height field label.
+     */
+
+    LABEL_PG_HEIGHT: "Page Height:",
+
+    /**
+     * Column count field label.
+     */
+
+    LABEL_COL_COUNT: "Column Count:",
+
+    /**
+     * Row count field label.
+     */
+
+    LABEL_ROW_COUNT: "Row Count:",
+
+    /**
+     * Scale field label.
+     */
+
+    LABEL_SCALE: "Scale:",
+
+    /**
+     * File name field label.
+     */
+
+    LABEL_FILE_NAME: "File Name:",
+
+    /**
+     * Logging field label.
+     */
+
+    LABEL_LOGGING: "Logging?",
+
+    /**
+     * Cancel button text.
+     */
+
+    BUTTON_CANCEL: "Cancel",
+
+    /**
+     * OK button text.
+     */
+
+    BUTTON_OK: "Ok",
+
+    /**
+     * Object does not exist error string.
+     */
+
+    DOES_NOT_EXIST: " does not exist",
+
+    /**
+     * Could not create layer error string.
+     */
+
+    LAYER_NOT_CREATED: "Could not create layer. ",
+
+    /**
+     * Source folder field label.
+     */
+
+    LABEL_SRC_FOLDER: "Source Folder",
+
+    /**
+     * Choose folder label.
+     */
+
+    LABEL_CHOOSE_FOLDER: "Choose Folder",
+
+    /**
+     * Input field label.
+     */
+
+    LABEL_INPUT: "Input",
+
+    /**
+     * Size field label.
+     */
+
+    LABEL_SIZE: "Size",
+
+    /**
+     * Output field label.
+     */
+
+    LABEL_OUTPUT: "Output"
+};
+
+/**
+ * Global options object used to avoid having to pass a large number of variables in function calls.
+ * @type {{
+ *     ROWS          : int,
+ *     COLS          : int,
+ *     VOFF          : number,
+ *     HOFF          : number,
+ *     ROW_WIDTH     : number,
+ *     COL_WIDTH     : number,
+ *     FRM_WIDTH     : number,
+ *     FRM_HEIGHT    : number,
+ *     PG_WIDTH      : number,
+ *     PG_HEIGHT     : number,
+ *     PG_UNITS      : string,
+ *     GUTTER        : number,
+ *     SCALE         : number,
+ *     AIFORMAT      : [*],
+ *     SHRINK_TO_FIT : boolean,
+ *     START_FOLDER  : string,
+ *     FILENAME      : string,
+ *     LOGGING       : boolean,
+ *     LOG_FILE_PATH : string,
+ *     DEBUG         : boolean,
+ *     SKIP_COLS     : number,
+ *     STRIP         : [*]
+ * }}
+ */
+//#TODO: Add ability to save presets
 var CONFIG = {
 
     /**
      * Number of rows
      */
-    
-    ROWS: 20,
-    
+
+    ROWS: 10,
+
     /**
      * Number of columns
      */
-    
+
     COLS: 10,
-    
+
     /**
-     * Top & bottom page margins 
+     * Top & bottom page margins
      */
-    
+
     VOFF: 64,
-    
+
     /**
      * Left & Right page margins
      */
-     
+
     HOFF: 64,
-    
+
     /**
      * Row height. This is set programmatically.
      */
-     
-    ROW_WIDTH: 128,
-    
+
+    ROW_WIDTH: 64,
+
     /**
      * Column Height. This is set programmatically.
      */
-     
-    COL_WIDTH: 128,
-    
+
+    COL_WIDTH: 64,
+
     /**
      * @deprecated
      */
-    FRM_WIDTH: 128,
-    
+    FRM_WIDTH: 64,
+
     /**
      * @deprecated
      */
-    FRM_HEIGHT: 128,
-    
+    FRM_HEIGHT: 64,
+
     /**
      * Artboard width
-     * 
+     *
      * 10 columns 128 px wide, with 64 px page margins
      */
-    
-    PG_WIDTH: 1408,
-    
+
+    PG_WIDTH: 1120, // 2112, // 1408, // 792, // 1060,
+
     /**
      * Artboard height
      *
      * 20 rows 128 px tall, with 64 px page margins
      */
-    
-    PG_HEIGHT: 2688,
-    
+
+    PG_HEIGHT: 1400, // 2688, // 1300, // 6000,
+
     /**
      * Not yet fully-implemented. Will support multiple units
      */
-    
+
     PG_UNITS: "px",
-    
+
     /**
      * @deprecated
      */
-    
+
     GUTTER: 0,
-    
+
     /**
      * Enter scale in percentage 1-100
      */
-    
+
     SCALE: 100,
-    
+
     /**
      * Illustrator version compatibility
      */
-    
+
     AIFORMAT: Compatibility.ILLUSTRATOR10,
-    
+
     /**
      * If the icon is larger than the cell size, shrink it to the cell size
      */
-     
+
     SHRINK_TO_FIT: true,
-    
+
     /**
-     * Start folder for selection
+     * Starting folder for folder selector dialog
      */
-     
-    START_FOLDER: "~/Desktop",
-    
+
+    START_FOLDER: "~/github/iconify",
+
     /**
      * The contact sheet file name
      */
-     
+
     FILENAME: "contact-sheet",
-    
+
     /**
      * Enable logging?
      */
-     
+
     LOGGING: true,
-       
+
     /**
      * Log file location
      */
-     
+
     LOG_FILE_PATH: "~/Desktop/ai-contactsheet-log.txt",
-    
+
     /**
      * Verbose logging output?
      */
     DEBUG: true,
-        
+
     /**
      * @deprecated
      */
-     
-    SKIP_COLS: 0, 
-    
+
+    SKIP_COLS: 0,
+
     /**
      * Not fully-implemented
      */
-     
+
     STRIP: ["svg", "ai", "eps", "txt", "pdf"]
+};
+
+/**
+ * Get a value from an object or array.
+ * @param subject
+ * @param key
+ * @param _default
+ * @returns {*}
+ */
+function get( subject, key, _default ) {
+    var value = _default;
+    if (typeof(subject[key]) != 'undefined') {
+        value = subject[key];
+    }
+    return value;
+}
+
+/**
+ * Gets the screen dimensions and bounds.
+ * @returns {{left: *, top: *, right: *, bottom: *}}
+ * ,,-605,263,1893,-1048
+ */
+function getScreenSize() {
+
+    var view;
+    var result = null;
+    if ( view = app.activeDocument.views[0] ) {
+        view.zoom = 1;
+        result = {
+            left   : parseInt(view.bounds[0]),
+            top    : parseInt(view.bounds[1]),
+            right  : parseInt(view.bounds[2]),
+            bottom : parseInt(view.bounds[3]),
+            width  : parseInt(view.bounds[2]) - parseInt(view.bounds[0]),
+            height : parseInt(view.bounds[1]) - parseInt(view.bounds[3])
+        };
+    }
+    return result;
 }
 
 /**
@@ -204,85 +393,143 @@ var CONFIG = {
  *    - cell height
  *    - scale
  *    - logging enabled
- *    
+ *
  *    - number of cols        = divide page width by cell width
  *    - number of rows        = divide page height by cell height
  *    - side margins          = (page width - (col count * col width))/2
  *    - top/bottom margins    = (page height - (row count * row width))/2
  *
- * @return Settings object
+ * @return boolean|Settings object
  */
-function doDisplayDialog() { 
+function doDisplayDialog() {
 
-    var dialog = new Window("dialog", LANG.LABEL_CONTACT_SHEET_SETTINGS, [550, 350, 900, 700]); 
+    var dialogWidth  = 450;
+    var dialogHeight = 410;
+
+    var dialogLeft = 550;
+    var dialogTop  = 300;
+
+    if ( bounds = getScreenSize() ) {
+        dialogLeft = Math.abs(Math.ceil((bounds.width/2) - (dialogWidth/2)));
+        // dialogTop  = Math.abs(Math.ceil((bounds.height) - (dialogHeight/2)));
+    }
+
+    /**
+     * Dialog bounds: [ Left, TOP, RIGHT, BOTTOM ]
+     * default: //550, 350, 1000, 800
+     */
+
+    var dialog   = new Window(
+        "dialog", LANG.LABEL_DIALOG_WINDOW, [
+            dialogLeft,
+            dialogTop,
+            dialogLeft + dialogWidth,
+            dialogTop + dialogHeight
+        ]
+    );
     var response = false;
-    
-    try {
-        dialog.pageWidthLabel       = dialog.add("statictext", [32, 30, 132, 60], LANG.LABEL_PG_WIDTH);
-        dialog.pageWidth            = dialog.add("edittext", [150, 30, 200, 60], CONFIG.PG_WIDTH); 
-        dialog.pageWidth.active     = true;
-    
-        dialog.pageHeightLabel      = dialog.add("statictext", [32, 70, 132, 100], LANG.LABEL_PG_HEIGHT);
-        dialog.pageHeight           = dialog.add("edittext", [150, 70, 200, 100], CONFIG.PG_HEIGHT); 
-        dialog.pageHeight.active    = true;
-        
-        dialog.colsLabel            = dialog.add("statictext", [32, 110, 132, 140], LANG.LABEL_COL_COUNT);
-        dialog.cols                 = dialog.add("edittext", [150, 110, 200, 140], CONFIG.COLS); 
-        dialog.cols.active          = true;
-    
-        dialog.rowsLabel            = dialog.add("statictext", [32, 150, 132, 180], LANG.LABEL_ROW_COUNT);
-        dialog.rows                 = dialog.add("edittext", [150, 150, 200, 180], CONFIG.ROWS); 
-        dialog.rows.active          = true;
-    
-        dialog.scaleLabel           = dialog.add("statictext", [32, 190, 132, 220], LANG.LABEL_SCALE);
-        dialog.scale                = dialog.add("edittext", [150, 190, 200, 220], CONFIG.SCALE); 
-        dialog.scale.active         = true;
-        
-        dialog.filenameLabel        = dialog.add("statictext", [32, 230, 132, 260], LANG.LABEL_FILE_NAME);
-        dialog.filename             = dialog.add("edittext", [150, 230, 320, 260], CONFIG.FILENAME); 
-        dialog.filename.active      = true;
-    
-        dialog.logging              = dialog.add('checkbox', [32, 270, 132, 340], LANG.LABEL_LOGGING);
-        dialog.logging.value        = CONFIG.LOGGING;
 
-        dialog.cancelBtn            = dialog.add("button", [80,300,170,330], LANG.BUTTON_CANCEL, {name:"cancel"});
-        dialog.openBtn              = dialog.add("button", [180,300,270,330], LANG.BUTTON_OK, {name:"ok"});
-    
-        dialog.cancelBtn.onClick = function() { 
+    try {
+
+        /**
+         * Row height
+         * @type {number}
+         */
+        var rh = 30;
+
+        /**
+         * Column width
+         * @type {number}
+         */
+        var cw  = 112;
+
+        var c1  = 28;
+        var c1w = c1 + 112;
+
+        var c2  = 164;
+        var c2w = c2 + 50;
+
+        var p1 = 16;
+        var p2 = dialogWidth - 16;
+
+        var r1 = 40;
+
+        dialog.sizePanel         = dialog.add('panel',      [p1, 16, p2, 200],    LANG.LABEL_SIZE);
+        dialog.outputPanel       = dialog.add('panel',      [p1, 200, p2, 290],   LANG.LABEL_OUTPUT);
+        dialog.sourcePanel       = dialog.add('panel',      [p1, 290, p2, 350],   LANG.LABEL_INPUT);
+
+        dialog.pageWidthLabel    = dialog.add("statictext", [c1, r1, c1w, 70],    LANG.LABEL_PG_WIDTH);
+        dialog.pageWidth         = dialog.add("edittext",   [c2, r1, c2w, 70],    CONFIG.PG_WIDTH);
+        dialog.pageWidth.active  = true;
+
+        dialog.pageHeightLabel   = dialog.add("statictext", [c1, 70, c1w, 100],   LANG.LABEL_PG_HEIGHT);
+        dialog.pageHeight        = dialog.add("edittext",   [c2, 70, c2w, 100],   CONFIG.PG_HEIGHT);
+        dialog.pageHeight.active = true;
+
+        dialog.colsLabel         = dialog.add("statictext", [c1, 100, c1w, 130],  LANG.LABEL_COL_COUNT);
+        dialog.cols              = dialog.add("edittext",   [c2, 100, c2w, 130],  CONFIG.COLS);
+        dialog.cols.active       = true;
+
+        dialog.rowsLabel         = dialog.add("statictext", [c1, 130, c1w, 160],  LANG.LABEL_ROW_COUNT);
+        dialog.rows              = dialog.add("edittext",   [c2, 130, c2w, 160],  CONFIG.ROWS);
+        dialog.rows.active       = true;
+
+        dialog.scaleLabel        = dialog.add('statictext', [c1, 160, c1w, 190],  LANG.LABEL_SCALE);
+        dialog.scale             = dialog.add('edittext',   [c2, 160, c2w, 190],  CONFIG.SCALE);
+        dialog.scale.active      = true;
+
+        dialog.filenameLabel     = dialog.add('statictext', [c1, 220, c1w, 250],  LANG.LABEL_FILE_NAME);
+        dialog.filename          = dialog.add('edittext',   [c2, 220, 334, 250],  '');
+        dialog.filename.active   = true;
+
+        dialog.logging           = dialog.add('checkbox',   [c1, 260, c1w, 330],  LANG.LABEL_LOGGING);
+        dialog.logging.value     = CONFIG.LOGGING;
+
+        dialog.folderBtn         = dialog.add('button',     [c1, 310, c1w, 340],  LANG.LABEL_CHOOSE_FOLDER, {name: 'folder'});
+
+        dialog.srcFolder         = dialog.add('edittext',   [140, 310, 424, 340], '');
+        dialog.srcFolder.active  = false;
+
+        dialog.cancelBtn         = dialog.add('button',     [232, 360, 332, 390], LANG.BUTTON_CANCEL, {name: 'cancel'});
+        dialog.openBtn           = dialog.add('button',     [334, 360, 434, 390], LANG.BUTTON_OK, {name: 'ok'});
+
+        dialog.cancelBtn.onClick = function() {
             dialog.close();
             response = false;
             return false;
         };
-    
-        dialog.openBtn.onClick = function() { 
 
-            CONFIG.PG_WIDTH     = parseInt(dialog.pageWidth.text); 
-            CONFIG.PG_HEIGHT    = parseInt(dialog.pageHeight.text); 
-            CONFIG.LOGGING      = dialog.logging.value;
-            CONFIG.SCALE        = parseInt(dialog.scale.text);
-            
-            CONFIG.COLS         = parseInt(dialog.cols.text);  
-            CONFIG.ROWS         = parseInt(dialog.rows.text); 
-            
-            CONFIG.COL_WIDTH    = parseInt((CONFIG.PG_WIDTH - (CONFIG.HOFF * 2)) / CONFIG.COLS);
-            CONFIG.ROW_HEIGHT   = parseInt((CONFIG.PG_HEIGHT - (CONFIG.VOFF * 2)) / CONFIG.ROWS);
-            CONFIG.FRM_WIDTH    = CONFIG.COL_WIDTH;
-            CONFIG.FRM_HEIGHT   = CONFIG.ROW_HEIGHT;
-            
-            if (CONFIG.DEBUG) {
-                logger("CONFIG.PG_WIDTH: " + CONFIG.PG_WIDTH);
-                logger("CONFIG.PG_HEIGHT: " + CONFIG.PG_HEIGHT);
-                logger("CONFIG.FRM_WIDTH: " + CONFIG.FRM_WIDTH);
-                logger("CONFIG.FRM_HEIGHT: " + CONFIG.FRM_HEIGHT);
-                logger("CONFIG.COL_WIDTH: " + CONFIG.COL_WIDTH);
-                logger("CONFIG.ROW_HEIGHT: " + CONFIG.ROW_HEIGHT);
-                logger("CONFIG.SCALE: " + CONFIG.SCALE);
-                logger("CONFIG.ROWS: " + CONFIG.ROWS);
-                logger("CONFIG.COLS: " + CONFIG.COLS);
-                logger("CONFIG.VOFF: " + CONFIG.VOFF);
-                logger("CONFIG.HOFF: " + CONFIG.HOFF);
+        dialog.folderBtn.onClick = function() {
+            var srcFolder;
+            if ( srcFolder = Folder.selectDialog( CONFIG.CHOOSE_FOLDER ) ) {
+
+                if ( srcFolder.fs == 'Windows' ) {
+                    CONFIG.PATH_SEPATATOR = "\\"
+                }
+
+                dialog.srcFolder.text = srcFolder.path + CONFIG.PATH_SEPATATOR + srcFolder.name;
+                CONFIG.SRC_FOLDER = srcFolder;
+                if ( trim(dialog.filename.text) == '' ) {
+                    dialog.filename.text = srcFolder.name + '-merged.ai';
+                    CONFIG.OUTPUT_FILENAME = dialog.filename.text;
+                }
             }
-            
+        };
+
+        dialog.openBtn.onClick = function() {
+
+            CONFIG.PG_WIDTH        = parseInt(dialog.pageWidth.text);
+            CONFIG.PG_HEIGHT       = parseInt(dialog.pageHeight.text);
+            CONFIG.LOGGING         = dialog.logging.value;
+            CONFIG.SCALE           = parseInt(dialog.scale.text);
+            CONFIG.COLS            = parseInt(dialog.cols.text);
+            CONFIG.ROWS            = parseInt(dialog.rows.text);
+            CONFIG.COL_WIDTH       = parseInt((CONFIG.PG_WIDTH - (CONFIG.HOFF * 2)) / CONFIG.COLS);
+            CONFIG.ROW_HEIGHT      = parseInt((CONFIG.PG_HEIGHT - (CONFIG.VOFF * 2)) / CONFIG.ROWS);
+            CONFIG.FRM_WIDTH       = CONFIG.COL_WIDTH;
+            CONFIG.FRM_HEIGHT      = CONFIG.ROW_HEIGHT;
+            CONFIG.OUTPUT_FILENAME = dialog.filename.text;
+
             dialog.close();
             response = true;
             return true;
@@ -298,15 +545,15 @@ function doDisplayDialog() {
 
 /**
  * Utility function to strip the file extension from a user-supplied file name
- * @param <string> filename
- * @return <string> The new file name sans extension
+ * @param {string} filename
+ * @return {string} The new file name sans extension
  */
 function stripFileExtension(filename) {
     var bits = filename.split(".");
     var bit  = bits[bits.length-1];
     var found = false;
     if (bits.length > 1 && bit) {
-        for (ext in CONFIG.STRIP) {
+        for (var ext in CONFIG.STRIP) {
             if (ext.toLowerCase() == bit.toLowerCase()) {
                 found = true;
             }
@@ -320,256 +567,225 @@ function stripFileExtension(filename) {
  * Main logic to create the contact sheet.
  * @return void
  */
-function doCreateContactSheet() {  
-  
-    var doc, fileList, i, srcFolder, svgFile, 
-        svgFilePath, saveCompositeFile, allFiles,
-        theFolders, svgFileList, theLayer;  
-    
+function doCreateContactSheet() {
+
+    var doc, fileList, srcFolder, svgFile, allFiles,
+        theFolders, svgFileList, theLayer;
+
     var saveCompositeFile = false;
 
-    srcFolder = Folder.selectDialog(LANG.CHOOSE_FOLDER, CONFIG.START_FOLDER);
+    if (! doDisplayDialog()) {
+        return;
+    }
 
-    if (srcFolder != null) {  
-    
-        allFiles = srcFolder.getFiles();
-        theFolders = [];
-        
-        for (var x=0; x < allFiles.length; x++) {
-            if (allFiles[x] instanceof Folder) {
-                theFolders.push(allFiles[x]);
-            }
+    srcFolder = CONFIG.SRC_FOLDER;
+
+    if ( srcFolder == null ) return;
+
+    if (svgFileList = getFilesInSubfolders( srcFolder )) {
+
+        if (trim(CONFIG.FILENAME) == "") {
+            CONFIG.FILENAME = srcFolder.name.replace(" ", "-") + "-all";
         }
-        
-        svgFileList = [];
-        if (theFolders.length == 0) {
-            svgFileList = srcFolder.getFiles(/\.svg$/i);
-        }
-        else {
-            for (var x=0; x < theFolders.length; x++) {
-                // Gets just the SVG files…  
-                fileList = theFolders[x].getFiles(/\.svg$/i);
-                for (var n = 0; n<fileList.length; n++) {
-                    svgFileList.push(fileList[n]);
+
+        app.coordinateSystem = CoordinateSystem.ARTBOARDCOORDINATESYSTEM;
+
+        doc = app.documents.add(
+            DocumentColorSpace.RGB,
+            CONFIG.PG_WIDTH,
+            CONFIG.PG_HEIGHT,
+            CONFIG.PG_COUNT = Math.ceil(svgFileList.length / (CONFIG.ROWS * CONFIG.COLS)),
+            DocumentArtboardLayout.GridByCol,
+            CONFIG.GUTTER,
+            Math.round(Math.sqrt(Math.ceil(svgFileList.length / (CONFIG.ROWS * CONFIG.COLS))))
+        );
+
+        for (var i = 0; i < svgFileList.length; i++) {
+
+            var board;
+            var bounds;
+            var boardWidth;
+            var rowCount, colCount;
+            var myY1, myY2;
+            var x1 = y1 = x2 = y2 = 0;
+
+            var myRowHeight   = CONFIG.ROW_HEIGHT + CONFIG.GUTTER;
+            var myColumnWidth = CONFIG.COL_WIDTH  + CONFIG.GUTTER;
+
+            for (var pageCounter = CONFIG.PG_COUNT -1; pageCounter >= 0; pageCounter--) {
+
+                doc.artboards.setActiveArtboardIndex(pageCounter);
+                board  = doc.artboards[pageCounter];
+                bounds = board.artboardRect;
+                boardWidth = Math.round(bounds[2] - bounds[0]);
+
+                /**
+                 * loop through rows
+                 * @type {number}
+                 */
+
+                rowCount = Math.ceil((svgFileList.length / CONFIG.COLS));
+
+                rowCount = CONFIG.ROWS > rowCount ? rowCount : CONFIG.ROWS ;
+
+                /**
+                 * If we are skipping a column, chances are we need to
+                 * add a new row for the overflow of the shift. Even if there
+                 * is not a new row needed, there are no consequences for
+                 * adding one, so just in case.
+                 */
+
+                if (CONFIG.SKIP_COLS > 0) {
+                    rowCount++;
                 }
-            }
-        }
 
-        if (svgFileList.length > 0) {
-        
-            if (! doDisplayDialog()) {
-                return;
-            }
-            
-            if (CONFIG.FILENAME.replace(" ", "") == "") {
-                CONFIG.FILENAME = srcFolder.name.replace(" ", "-") + "-all";
-            }
-            // CONFIG.FILENAME = stripFileExtension(CONFIG.FILENAME);
-        
-            app.coordinateSystem = CoordinateSystem.ARTBOARDCOORDINATESYSTEM;  
+                for (var rowCounter = 1 ; rowCounter <= rowCount; rowCounter++) {
 
-            doc = app.documents.add(
-                DocumentColorSpace.RGB,  
-                CONFIG.PG_WIDTH, 
-                CONFIG.PG_HEIGHT, 
-                CONFIG.PG_COUNT = Math.ceil(svgFileList.length / (CONFIG.ROWS * CONFIG.COLS)),  
-                DocumentArtboardLayout.GridByCol,  
-                CONFIG.GUTTER, 
-                Math.round(Math.sqrt(Math.ceil(svgFileList.length / (CONFIG.ROWS * CONFIG.COLS))))  
-            );
+                    myY1 = bounds[1] + CONFIG.VOFF + (myRowHeight * (rowCounter-1));
+                    myY2 = myY1 + CONFIG.FRM_HEIGHT;
 
-            for (var i = 0; i < svgFileList.length; i++) {
-                
-                var board;
-                var bounds;
-                var x1 = y1 = x2 = y2 = 0;
-        
-                var myRowHeight         = CONFIG.ROW_HEIGHT + CONFIG.GUTTER;
-                var myColumnWidth       = CONFIG.COL_WIDTH  + CONFIG.GUTTER
-                var myFrameWidth        = CONFIG.FRM_WIDTH
-                var myFrameHeight       = CONFIG.FRM_HEIGHT
-        
-                for (var pageCounter = CONFIG.PG_COUNT -1; pageCounter >= 0; pageCounter--) {
+                    /**
+                     * loop through columns
+                     * @type {Number}
+                     */
 
-                    doc.artboards.setActiveArtboardIndex(pageCounter);  
-                    board  = doc.artboards[pageCounter];
-                    bounds = board.artboardRect;
-                    boardWidth = Math.round(bounds[2] - bounds[0]);
+                    colCount = CONFIG.COLS;
 
-                    // loop through rows
-            
-                    var rowCount = Math.ceil((svgFileList.length / CONFIG.COLS));
-            
-                    rowCount = CONFIG.ROWS > rowCount ? rowCount : CONFIG.ROWS ;
-            
-                    // If we are skipping a column, chances are we need to 
-                    // add a new row for the overflow of the shift. Even if there 
-                    // is not a new row needed, there are no consequences for 
-                    // adding one, so just in case.
-            
-                    if (CONFIG.SKIP_COLS > 0) {
-                        rowCount++;
+                    if (rowCounter > 1) {
+
+                        var remaining = Math.ceil(svgFileList.length - i);
+                        if (remaining < colCount) {
+                            colCount = remaining;
+                        }
                     }
-            
-                    for (var rowCounter = 1 ; rowCounter <= rowCount; rowCounter++) {  
 
-                        myY1 = bounds[1] + CONFIG.VOFF + (myRowHeight * (rowCounter-1));
-                        myY2 = myY1 + CONFIG.FRM_HEIGHT;
-                
-                        // loop through columns
-                
-                        var colCount = CONFIG.COLS;
-                
-                        if (rowCounter > 1) {
-                
-                            var remaining = Math.ceil(svgFileList.length - i);
-                            if (remaining < colCount) {
-                                colCount = remaining;
+                    for (var columnCounter = 1 ; columnCounter <= colCount; columnCounter++) {
+                        try {
+
+                            /**
+                             * A hack to allow merging multiple contact sheets
+                             * Shift the starting row so it aligns nicely with
+                             * the icons already in the master contact sheet.
+                             */
+
+                            if (CONFIG.SKIP_COLS > 0 && rowCounter == 1 && columnCounter <= CONFIG.SKIP_COLS) {
+                                continue;
+                            }
+
+                            var f = new File(svgFileList[i]);
+
+                            if (f.exists) {
+
+                                try {
+                                    if (i == 0) {
+                                        theLayer = doc.layers[0];
+                                    }
+                                    else {
+                                        theLayer = doc.layers.add();
+                                    }
+
+                                    theLayer.name = f.name;
+                                }
+                                catch(ex) {
+                                    logger(LANG.LAYER_NOT_CREATED + ex);
+                                }
+
+                                var svgFile = doc.groupItems.createFromFile(f);
+
+                                var liveWidth = (CONFIG.COLS * (CONFIG.FRM_WIDTH + CONFIG.GUTTER)) - CONFIG.GUTTER;
+                                var hoff = Math.ceil((CONFIG.PG_WIDTH - liveWidth) / 2);
+
+                                var myX1 = bounds[0] + hoff + (myColumnWidth * (columnCounter-1));
+
+                                var shiftX = Math.ceil((CONFIG.FRM_WIDTH - svgFile.width) / 2);
+                                var shiftY = Math.ceil((CONFIG.FRM_WIDTH - svgFile.height) / 2);
+
+                                var x1 = myX1 + shiftX;
+                                var y1 = (myY1 + shiftY) * -1;
+
+                                try {
+                                    svgFile.position = [ x1, y1 ];
+
+                                    if (typeof(svgFile.resize) == "function") {
+                                        svgFile.resize(
+                                            CONFIG.SCALE,
+                                            CONFIG.SCALE,
+                                            true,
+                                            true,
+                                            true,
+                                            true,
+                                            CONFIG.SCALE
+                                        );
+                                    }
+
+                                    /**
+                                     * Only save the composite file if at least one
+                                     * icon exists and is successfully imported.
+                                     * @type {boolean}
+                                     */
+                                    saveCompositeFile = true;
+                                }
+                                catch(ex) {
+                                    try {
+                                        svgFile.position = [0, 0];
+                                        logger(ex);
+                                    }
+                                    catch(ex) {/*Exit Gracefully*/}
+                                }
+                            }
+                            else {
+                                logger(svgFileList[i] + LANG.DOES_NOT_EXIST);
                             }
                         }
-
-                        for (var columnCounter = 1 ; columnCounter <= colCount; columnCounter++) {  
-                            try {
-                    
-                                // A hack to allow merging multiple contact sheets 
-                                // Shift the starting row so it aligns nicely with 
-                                // the icons already in the master contact sheet.
-                        
-                                if (CONFIG.SKIP_COLS > 0 && rowCounter == 1 && columnCounter <= CONFIG.SKIP_COLS) {
-                                    continue;
-                                }
-
-                                var f = new File(svgFileList[i]);
-                        
-                                if (f.exists) {
-                                    
-                                    try {
-                                        if (i == 0) {
-                                           theLayer = doc.layers[0];
-                                        }
-                                        else {
-                                            theLayer = doc.layers.add();
-                                        } 
-
-                                        theLayer.name = f.name;
-                                    }
-                                    catch(ex) {
-                                        logger(LANG.LAYER_NOT_CREATED + ex);
-                                    }
-                                    svgFile = doc.groupItems.createFromFile(f); 
-                            
-                                    var liveWidth = (CONFIG.COLS * (CONFIG.FRM_WIDTH + CONFIG.GUTTER)) - CONFIG.GUTTER;
-                                    var hoff = Math.ceil((CONFIG.PG_WIDTH - liveWidth) / 2);
-
-                                    myX1 = bounds[0] + hoff + (myColumnWidth * (columnCounter-1));
-                                    myX2 = myX1 + CONFIG.FRM_HEIGHT;
-                    
-                                    var shiftX = Math.ceil((CONFIG.FRM_WIDTH - svgFile.width) / 2);
-                                    var shiftY = Math.ceil((CONFIG.FRM_WIDTH - svgFile.height) / 2);
-                    
-                                    x1 = myX1 + shiftX;
-                                    y1 = (myY1 + shiftY) * -1;
-
-                                    try {
-                                        svgFile.position = [ x1, y1 ];
-                                
-                                        if (typeof(svgFile.resize) == "function") {
-                                            svgFile.resize(CONFIG.SCALE, CONFIG.SCALE);
-                                        }
-                                
-                                        // Only save the composite file if at least one 
-                                        // icon exists and is successfully imported.
-                                        saveCompositeFile = true;
-                                    }
-                                    catch(ex) {
-                                        try {
-                                            svgFile.position = [0, 0];
-                                            logger(ex);
-                                        }
-                                        catch(ex) {/*Exit Gracefully*/}
-                                    }                            
-                                }
-                                else {
-                                    logger(svgFileList[i] + LANG.DOES_NOT_EXIT);
-                                }
-                            }
-                            catch(ex) {
-                                logger(ex);
-                                alert(ex);
-                            }
-                            i++;
-                        } 
+                        catch(ex) {
+                            logger(ex);
+                            alert(ex);
+                        }
+                        i++;
                     }
-                };
-                if (saveCompositeFile)
-                    saveFileAsAi(srcFolder.path + "/" + CONFIG.FILENAME);
+                }
             }
-        }; 
-    };  
-};
+            if (saveCompositeFile)
+                saveFileAsAi(srcFolder.path + "/" + CONFIG.FILENAME);
+        }
+    }
+}
 
 /**
- * Arranges items in the selection on a grid
- * @param <selection> sel    The current selection
- * @return void
+ * Get all files in sub-folders.
+ * @param srcFolder
+ * @returns {Array}
  */
-function arrangeItems(sel) {
+function getFilesInSubfolders( srcFolder ) {
 
-    var board;
-    var bounds;
-    var itemBounds;
-    var cols;
-    var cellSize;
-    var x1 = y1 = 0;
-    var boardWidth, boardHeight;
-    
-    board  = doc.artboards[doc.artboards.getActiveArtboardIndex()];
-    bounds = board.artboardRect;
-    
-    boardWidth = Math.round(bounds[2] - bounds[0]);
-    
-    cols = CONFIG.NUM_COLS;
-    rows = CONFIG.NUM_ROWS;
+    var allFiles, theFolders, svgFileList;
 
-    x1 = bounds[0] + cellSize;
-    y1 = bounds[1] - cellSize;
-    
-    for (var i = 0, slen = sel.length; i < slen; i++) {
-    
-        theItem = sel[i];
-        
-        itemBounds = theItem.visibleBounds;
-        
-        theItem.top  = y1 - ((cellSize - theItem.height) / 2);
-        theItem.left = x1 + ((cellSize - theItem.width) / 2);
-        
-        alignToNearestPixel(theItem);
-        
-        x1 += cellSize;
-        
-        if (i % cols == cols - 1) { 
-            x1  = bounds[0] + cellSize;    
-            y1 -= cellSize;
+    if ( ! srcFolder instanceof Folder) return;
+
+    allFiles    = srcFolder.getFiles();
+    theFolders  = [];
+    svgFileList = [];
+
+    for (var x=0; x < allFiles.length; x++) {
+        if (allFiles[x] instanceof Folder) {
+            theFolders.push(allFiles[x]);
         }
     }
 
-    if (CONFIG.SHRINK_TO_FIT) {
-        
-        // The bounds are plotted on a Cartesian Coordinate System.
-        // So a 32 x 32 pixel artboard with have the following coords:
-        // (assumes the artboard is positioned at 0, 0)
-        // x1 = -16, y1 = 16, x2 = 16, y2 = -16
-
-        // board.artboardRect = [x1, y1, x2, y2];
-    
-        board.artboardRect = [
-            bounds[0], 
-            bounds[1], 
-            bounds[0] + ((cols * cellSize) + (2 * cellSize)), 
-            bounds[1] - (rows * cellSize)
-        ];
+    if (theFolders.length == 0) {
+        svgFileList = srcFolder.getFiles(/\.svg$/i);
     }
-};
+    else {
+        for (var x=0; x < theFolders.length; x++) {
+            fileList = theFolders[x].getFiles(/\.svg$/i);
+            for (var n = 0; n<fileList.length; n++) {
+                svgFileList.push(fileList[n]);
+            }
+        }
+    }
+
+    return svgFileList;
+}
 
 /**
  * Saves the file in AI format.
@@ -588,29 +804,12 @@ function saveFileAsAi(dest) {
 }
 
 /**
- * Aligns selection to nearest whole pixel
- * @param <selection> sel The selection object
- * @return void
+ * Trims a string.
+ * @param str
+ * @returns {XML|string|void}
  */
-function alignToNearestPixel(sel) {
-    
-    try {
-        if (typeof sel != "object") {
-        
-            logger(LANG.NO_SELECTION);
-        } 
-        else {
-        
-            for (i = 0 ; i < sel.length; i++) {
-                sel[i].left = Math.round(sel[i].left);
-                sel[i].top = Math.round(sel[i].top);
-            }
-            redraw();
-        }
-    }
-    catch(ex) {
-        logger(ex);
-    }
+function trim(str) {
+    return str.replace(/^\s+|\s+$/g, '');
 }
 
 /**
@@ -618,42 +817,17 @@ function alignToNearestPixel(sel) {
  * @param <string> The logging text
  * @return void
  */
-function logger(txt) {  
+function logger(txt) {
 
     if (CONFIG.LOGGING == 0) return;
-    var file = new File(CONFIG.LOG_FILE_PATH);  
-    file.open("e", "TEXT", "????");  
-    file.seek(0,2);  
+    var file = new File(CONFIG.LOG_FILE_PATH);
+    file.open("e", "TEXT", "????");
+    file.seek(0,2);
     $.os.search(/windows/i)  != -1 ? file.lineFeed = 'windows'  : file.lineFeed = 'macintosh';
-    file.writeln("[" + new Date().toUTCString() + "] " + txt);  
-    file.close();  
-} 
+    file.writeln("[" + new Date().toUTCString() + "] " + txt);
+    file.close();
+}
 
-/**
- * Aligns the item to the nearest pixel for crisp rendering.
- * @param <object> item    The item to align
- * @return void
- */
-function alignToNearestPixel(item) {
-    if (item.height) {
-        item.height = moveToPixel(item.height);
-    }
-    if (item.width) {
-        item.width = moveToPixel(item.width);
-    }   
-    item.top  = moveToPixel(item.top);
-    item.left = moveToPixel(item.left);
-};
-
-/**
- * Adjusts a value to the nearest whole number
- * @param <float> n   The value to adjust
- * @return <int>
- */
-function moveToPixel(n) {
-    return Math.round(n)
-};
-
-doCreateContactSheet(); 
+doCreateContactSheet();
 
 userInteractionLevel = originalInteractionLevel;
