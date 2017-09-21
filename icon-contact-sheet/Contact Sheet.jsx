@@ -233,7 +233,6 @@ var LANG = {
  *     STRIP         : [*]
  * }}
  */
-//#TODO: Add ability to save presets
 var CONFIG = {
 
     /**
