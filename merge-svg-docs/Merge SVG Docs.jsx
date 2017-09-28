@@ -100,12 +100,21 @@ var LANG = {
     LABEL_SIZE             : 'Size',
     LABEL_OUTPUT           : 'Output',
     SORT_FILELIST_FAILED   : 'Could not sort the file list',
-    LABEL_SORT_ARTBOARDS   : 'Sort Artboards?'
+    LABEL_SORT_ARTBOARDS   : 'Sort Artboards?',
+    PROGRESS               : 'Progress'
 }
 
 
-//=================================== FUNCTIONS ====================================//
+/**
+ * Add Array.indexOf support if not supported natively.
+ */
 if(!Array.prototype.indexOf) {
+    /**
+     * Gets the index of an element in an array.
+     * @param what
+     * @param i
+     * @returns {*}
+     */
     Array.prototype.indexOf = function(what, i) {
         i = i || 0;
         var L = this.length;
@@ -117,6 +126,10 @@ if(!Array.prototype.indexOf) {
     };
 }
 
+/**
+ * Add Array.remove support.
+ * @returns {Array}
+ */
 Array.prototype.remove = function() {
     var what, a = arguments, L = a.length, ax;
     while (L && this.length) {
@@ -129,6 +142,9 @@ Array.prototype.remove = function() {
 };
 
 /*-------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * Adds JSON library support for engines that do not include it natively.
+ */
 "object"!=typeof JSON&&(JSON={}),function(){"use strict";function f(t){return 10>t?"0"+t:t}function quote(t){
     return escapable.lastIndex=0,escapable.test(t)?'"'+t.replace(escapable,function(t){var e=meta[t];
             return"string"==typeof e?e:"\\u"+("0000"+t.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+t+'"'}
@@ -386,6 +402,33 @@ function comparator(a, b) {
     return 0;
 }
 
+function showProgressBar(maxvalue) {
+
+    var top, right, bottom, left;
+
+    if ( bounds = getScreenSize() ) {
+        left = Math.abs(Math.ceil((bounds.width/2) - (450/2)));
+        top = Math.abs(Math.ceil((bounds.height/2) - (100/2)));
+    }
+
+    var progress = new Window("palette", LANG.PROGRESS, [left, top, left + 450, top + 100]);
+    progress.pnl = progress.add("panel", [10, 10, 440, 100], "Script Progress");
+    progress.pnl.progBar = progress.pnl.add("progressbar", [20, 35, 410, 60], 0, maxvalue);
+    progress.pnl.progBarLabel = progress.pnl.add("statictext", [20, 20, 320, 35], "0%");
+
+    progress.show();
+
+    return progress;
+}
+
+function updateProgress(progress) {
+    progress.pnl.progBar.value++;
+    progress.pnl.progBarLabel.text = progress.pnl.progBar.value+"%";
+    $.sleep(10);
+    progress.update();
+    return progress;
+}
+
 /**
  * Import files to artboards. Sets artboard name to file name minus file extension.
  */
@@ -441,6 +484,8 @@ function filesToArtboards() {
             CONFIG.ARTBOARD_ROWSxCOLS = Math.round(Math.sqrt(fileList.length))
         );
 
+        var progress = showProgressBar(CONFIG.ARTBOARD_COUNT);
+
         /**
          * Loop thru the counter
          */
@@ -472,6 +517,8 @@ function filesToArtboards() {
             	    svgFile = doc.groupItems.createFromFile(f);
             	}
 
+            	updateProgress(progress);
+
                 /**
                  * Move relative to this artboards rulers
                  */
@@ -499,8 +546,9 @@ function filesToArtboards() {
                 	+ fileList[i] + " `. Error: " + ex
                 );
             }
-
         };
+
+        progress.close();
 
         saveFileAsAi(srcFolder.path + CONFIG.PATH_SEPATATOR + CONFIG.OUTPUT_FILENAME);
     };
