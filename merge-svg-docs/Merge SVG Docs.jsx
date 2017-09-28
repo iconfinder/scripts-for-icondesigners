@@ -39,6 +39,9 @@
 
 #target Illustrator
 
+var originalInteractionLevel = userInteractionLevel;
+userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
+
 /**
  * Default configuration. Many of these values are over-written by the dialog.
  * @type {{
@@ -57,17 +60,19 @@
  */
 var CONFIG = {
     ARTBOARD_COUNT      : 1,
-    ARTBOARD_WIDTH      : 64,
-    ARTBOARD_HEIGHT     : 64,
-    ARTBOARD_SPACING    : 64,
+    ARTBOARD_WIDTH      : 24,
+    ARTBOARD_HEIGHT     : 24,
+    ARTBOARD_SPACING    : 24,
     ARTBOARD_ROWSxCOLS  : 10,
     LOG_FILE_PATH       : "~/Downloads/ai-script-log.txt",
+    CONFIG_FILE_PATH    : "~/Downloads/ai-script-conf.json",
     LOGGING             : true,
     OUTPUT_FILENAME     : "merged-files.ai",
     SCALE               : 100,
     ROOT                : "~/Documents",
     SRC_FOLDER          : "",
-    PATH_SEPATATOR      : "/"
+    PATH_SEPATATOR      : "/",
+    SORT_ARTBOARDS      : true
 }
 
 /**
@@ -93,8 +98,63 @@ var LANG = {
     LABEL_CHOOSE_FOLDER    : 'Choose Folder',
     LABEL_INPUT            : 'Input',
     LABEL_SIZE             : 'Size',
-    LABEL_OUTPUT           : 'Output'
+    LABEL_OUTPUT           : 'Output',
+    SORT_FILELIST_FAILED   : 'Could not sort the file list',
+    LABEL_SORT_ARTBOARDS   : 'Sort Artboards?'
 }
+
+
+//=================================== FUNCTIONS ====================================//
+if(!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(what, i) {
+        i = i || 0;
+        var L = this.length;
+        while (i < L) {
+            if(this[i] === what) return i;
+            ++i;
+        }
+        return -1;
+    };
+}
+
+Array.prototype.remove = function() {
+    var what, a = arguments, L = a.length, ax;
+    while (L && this.length) {
+        what = a[--L];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+};
+
+/*-------------------------------------------------------------------------------------------------------------------------*/
+"object"!=typeof JSON&&(JSON={}),function(){"use strict";function f(t){return 10>t?"0"+t:t}function quote(t){
+    return escapable.lastIndex=0,escapable.test(t)?'"'+t.replace(escapable,function(t){var e=meta[t];
+            return"string"==typeof e?e:"\\u"+("0000"+t.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+t+'"'}
+    function str(t,e){var n,r,o,f,u,i=gap,p=e[t];switch(p&&"object"==typeof p&&"function"==typeof p.toJSON&&(p=p.toJSON(t)),
+    "function"==typeof rep&&(p=rep.call(e,t,p)),typeof p){case"string":return quote(p);case"number":return isFinite(p)?String(p):"null";
+        case"boolean":case"null":return String(p);case"object":if(!p)return"null";if(gap+=indent,u=[],"[object Array]"===Object.prototype.toString.apply(p)){
+            for(f=p.length,n=0;f>n;n+=1)u[n]=str(n,p)||"null";return o=0===u.length?"[]":gap?"[\n"+gap+u.join(",\n"+gap)+"\n"+i+"]":"["+u.join(",")+"]",gap=i,o}
+            if(rep&&"object"==typeof rep)for(f=rep.length,n=0;f>n;n+=1)"string"==typeof rep[n]&&(r=rep[n],o=str(r,p),o&&u.push(quote(r)+(gap?": ":":")+o));
+            else for(r in p)Object.prototype.hasOwnProperty.call(p,r)&&(o=str(r,p),o&&u.push(quote(r)+(gap?": ":":")+o));return o=0===u.length?"{}":gap?"{\n"+gap+
+                    u.join(",\n"+gap)+"\n"+i+"}":"{"+u.join(",")+"}",gap=i,o}}"function"!=typeof Date.prototype.toJSON&&(Date.prototype.toJSON=function(){
+        return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+
+            f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null},String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(){
+        return this.valueOf()});var cx,escapable,gap,indent,meta,rep;"function"!=typeof JSON.stringify&&
+    (escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        meta={"\b":"\\b","  ":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"},JSON.stringify=function(t,e,n){var r;
+        if(gap="",indent="","number"==typeof n)for(r=0;n>r;r+=1)indent+=" ";else"string"==typeof n&&(indent=n);if(rep=e,
+            e&&"function"!=typeof e&&("object"!=typeof e||"number"!=typeof e.length))throw new Error("JSON.stringify");return str("",{"":t})}),
+    "function"!=typeof JSON.parse&&(cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
+        JSON.parse=function(text,reviver){function walk(t,e){var n,r,o=t[e];if(o&&"object"==typeof o)for(n in o)Object.prototype.hasOwnProperty.call(o,n)&&
+        (r=walk(o,n),void 0!==r?o[n]=r:delete o[n]);return reviver.call(t,e,o)}var j;if(text=String(text),cx.lastIndex=0,cx.test(text)&&
+            (text=text.replace(cx,function(t){return"\\u"+("0000"+t.charCodeAt(0).toString(16)).slice(-4)})),
+                /^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@")
+                    .replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]")
+                    .replace(/(?:^|:|,)(?:\s*\[)+/g,"")))return j=eval("("+text+")"),"function"==typeof reviver?walk({"":j},""):j;
+            throw new SyntaxError("JSON.parse")})}();
+/*-------------------------------------------------------------------------------------------------------------------------*/
 
 /**
  * Get a value from an object or array.
@@ -119,19 +179,19 @@ function get( subject, key, _default ) {
 function getScreenSize() {
 
     try {
-        if (view = app.activeDocument.views[0] ) {
-            view.zoom = 1;
-            return {
-                left   : parseInt(view.bounds[0]),
-                top    : parseInt(view.bounds[1]),
-                right  : parseInt(view.bounds[2]),
-                bottom : parseInt(view.bounds[3]),
-                width  : parseInt(view.bounds[2]) - parseInt(view.bounds[0]),
-                height : parseInt(view.bounds[1]) - parseInt(view.bounds[3])
-            };
-        }
+		if (view = app.activeDocument.views[0] ) {
+			view.zoom = 1;
+			return {
+				left   : parseInt(view.bounds[0]),
+				top    : parseInt(view.bounds[1]),
+				right  : parseInt(view.bounds[2]),
+				bottom : parseInt(view.bounds[3]),
+				width  : parseInt(view.bounds[2]) - parseInt(view.bounds[0]),
+				height : parseInt(view.bounds[1]) - parseInt(view.bounds[3])
+			};
+		}
     }
-    catch(e){}
+    catch(ex){/*Exit Gracefully*/}
     return null;
 }
 
@@ -164,7 +224,6 @@ function doDisplayDialog() {
 
     if ( bounds = getScreenSize() ) {
         dialogLeft = Math.abs(Math.ceil((bounds.width/2) - (dialogWidth/2)));
-        // dialogTop  = Math.abs(Math.ceil((bounds.height) - (dialogHeight/2)));
     }
 
     /**
@@ -182,6 +241,11 @@ function doDisplayDialog() {
     );
 
     try {
+
+        var configFile = new File(CONFIG.CONFIG_FILE_PATH);
+        if (configFile.exists) {
+            CONFIG = JSON.parse(read_file(configFile));
+        }
 
         /**
          * Row height
@@ -206,8 +270,8 @@ function doDisplayDialog() {
 
         var r1 = 40;
 
-        dialog.sizePanel              = dialog.add('panel',      [p1, 16, p2, 200],   LANG.LABEL_SIZE);
-        dialog.outputPanel            = dialog.add('panel',      [p1, 200, p2, 290],  LANG.LABEL_OUTPUT);
+        dialog.sizePanel              = dialog.add('panel',      [p1, 16, p2, 170],   LANG.LABEL_SIZE);
+        dialog.outputPanel            = dialog.add('panel',      [p1, 170, p2, 290],  LANG.LABEL_OUTPUT);
         dialog.sourcePanel            = dialog.add('panel',      [p1, 290, p2, 350],  LANG.LABEL_INPUT);
 
         dialog.artboardWidthLabel     = dialog.add('statictext', [c1, r1, c1w, 70],   LANG.LABEL_ARTBOARD_WIDTH);
@@ -222,24 +286,23 @@ function doDisplayDialog() {
         dialog.artboardSpacing        = dialog.add('edittext',   [c2, 100, c2w, 130], CONFIG.ARTBOARD_SPACING);
         dialog.artboardSpacing.active = true;
 
-        dialog.colsLabel              = dialog.add('statictext', [c1, 130, c1w, 160], LANG.LABEL_COL_COUNT);
-        dialog.cols                   = dialog.add('edittext',   [c2, 130, c2w, 160], CONFIG.ARTBOARD_ROWSxCOLS);
-        dialog.cols.active            = true;
-
-        dialog.scaleLabel             = dialog.add('statictext', [c1, 160, c1w, 190], LANG.LABEL_SCALE);
-        dialog.scale                  = dialog.add('edittext',   [c2, 160, c2w, 190], CONFIG.SCALE);
+        dialog.scaleLabel             = dialog.add('statictext', [c1, 130, c1w, 160], LANG.LABEL_SCALE);
+        dialog.scale                  = dialog.add('edittext',   [c2, 130, c2w, 160], CONFIG.SCALE);
         dialog.scale.active           = true;
 
-        dialog.filenameLabel          = dialog.add('statictext', [c1, 220, c1w, 250], LANG.LABEL_FILE_NAME);
-        dialog.filename               = dialog.add('edittext',   [c2, 220, 334, 250], '');
+        dialog.filenameLabel          = dialog.add('statictext', [c1, 190, c1w, 220], LANG.LABEL_FILE_NAME);
+        dialog.filename               = dialog.add('edittext',   [c2, 190, 334, 220], CONFIG.OUTPUT_FILENAME);
         dialog.filename.active        = true;
 
-        dialog.logging                = dialog.add('checkbox',   [c1, 260, c1w, 330], LANG.LABEL_LOGGING);
+        dialog.logging                = dialog.add('checkbox',   [c1, 230, c1w, 300], LANG.LABEL_LOGGING);
         dialog.logging.value          = CONFIG.LOGGING;
+
+        dialog.sortboards             = dialog.add('checkbox',   [c1, 260, c1w, 330], LANG.LABEL_SORT_ARTBOARDS);
+        dialog.sortboards.value       = CONFIG.SORT_ARTBOARDS;
 
         dialog.folderBtn              = dialog.add('button',     [c1, 310, c1w, 340],  LANG.LABEL_CHOOSE_FOLDER, {name: 'folder'})
 
-        dialog.srcFolder              = dialog.add('edittext',   [140, 310, 424, 340], "");
+        dialog.srcFolder              = dialog.add('edittext',   [140, 310, 424, 340], CONFIG.SRC_FOLDER);
         dialog.srcFolder.active       = false;
 
         dialog.cancelBtn              = dialog.add('button',     [232, 360, 332, 390], LANG.BUTTON_CANCEL, {name: 'cancel'});
@@ -260,7 +323,7 @@ function doDisplayDialog() {
                 }
 
                 dialog.srcFolder.text = srcFolder.path + CONFIG.PATH_SEPATATOR + srcFolder.name;
-                CONFIG.SRC_FOLDER = srcFolder;
+                CONFIG.SRC_FOLDER = dialog.srcFolder.text;
                 if ( trim(dialog.filename.text) == '' ) {
                     dialog.filename.text = srcFolder.name + '-merged.ai';
                     CONFIG.OUTPUT_FILENAME = dialog.filename.text;
@@ -273,12 +336,15 @@ function doDisplayDialog() {
             CONFIG.ARTBOARD_WIDTH      = parseInt(dialog.artboardWidth.text);
             CONFIG.ARTBOARD_HEIGHT     = parseInt(dialog.artboardHeight.text);
             CONFIG.LOGGING             = dialog.logging.value;
+            CONFIG.SORT_ARTBOARDS      = dialog.sortboards.value;
             CONFIG.SPACING             = parseInt(dialog.artboardSpacing.text);
             CONFIG.SCALE               = parseInt(dialog.scale.text);
-            CONFIG.ARTBOARD_ROWSxCOLS  = parseInt(dialog.cols.text);
             CONFIG.OUTPUT_FILENAME     = dialog.filename.text;
 
             dialog.close();
+
+            write_file(CONFIG.CONFIG_FILE_PATH, JSON.stringify(CONFIG), true);
+
             response = true;
             return true;
         };
@@ -292,6 +358,35 @@ function doDisplayDialog() {
 }
 
 /**
+ * Cleans up the filename/artboardname.
+ * @param {String}    name    The name to filter and reformat.
+ * @return {String}           The cleaned up name.
+ */
+function filterName(name) {
+
+    return decodeURIComponent(name).replace(' ', '-');
+}
+
+/**
+ * Callback for sorting the SVG filelist.
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+function comparator(a, b) {
+    var nameA = filterName(a.name.toUpperCase());
+    var nameB = filterName(b.name.toUpperCase());
+    if (nameA < nameB) {
+        return -1;
+    }
+    if (nameA > nameB) {
+        return 1;
+    }
+    // names must be equal
+    return 0;
+}
+
+/**
  * Import files to artboards. Sets artboard name to file name minus file extension.
  */
 function filesToArtboards() {
@@ -302,7 +397,7 @@ function filesToArtboards() {
         return;
     }
 
-    srcFolder = CONFIG.SRC_FOLDER;
+    srcFolder = new Folder(CONFIG.SRC_FOLDER);
 
     if ( srcFolder == null ) return;
 
@@ -318,6 +413,15 @@ function filesToArtboards() {
      * Make sure it has AI files in it…
      */
     if (fileList.length > 0) {
+
+        if (CONFIG.SORT_ARTBOARDS == true) {
+            try {
+                fileList.sort(comparator);
+            }
+            catch(ex) {
+                logger(LANG.SORT_FILELIST_FAILED);
+            }
+        }
 
         /**
          * Set the script to work with artboard rulers
@@ -348,56 +452,71 @@ function filesToArtboards() {
             doc.artboards.setActiveArtboardIndex(i);
 
             var bits = srcFolder.name.split('-');
-            var base = bits.slice(1, bits.length).join('-');
+            var base = trim(bits.slice(1, bits.length).join('-'));
+            var boardName = fileList[i].name.replace(".svg", "");
 
-            doc.artboards[i].name = base + "-" + fileList[i].name.replace(".svg", "");
+            if (base != '') {
+                boardName = base + ' ' + boardName;
+            }
+
+            logger("BOARD NAME: " + filterName(boardName));
+
+            doc.artboards[i].name = filterName(boardName);
 
             /**
              * Create group from SVG
              */
             try {
                 var f = new File(fileList[i]);
-                if (f.exists) {
-                    svgFile = doc.groupItems.createFromFile(f);
+            	if (f.exists) {
+            	    svgFile = doc.groupItems.createFromFile(f);
+            	}
+
+                /**
+                 * Move relative to this artboards rulers
+                 */
+                try {
+                    svgFile.position = [
+                        Math.floor((CONFIG.ARTBOARD_WIDTH - svgFile.width) / 2),
+                        Math.floor((CONFIG.ARTBOARD_HEIGHT - svgFile.height) / 2) * -1
+                    ];
+                    if (typeof(svgFile.resize) == "function" && CONFIG.SCALE != 100) {
+                        svgFile.resize(CONFIG.SCALE, CONFIG.SCALE, true, true, true, true, CONFIG.SCALE);
+                    }
                 }
+                catch(ex) {
+                    try {
+                        svgFile.position = [0, 0];
+                    }
+                    catch(ex) {/*Exit Gracefully*/}
+                }
+
+                alignToNearestPixel(doc.selection);
             }
             catch(ex) {
                 logger(
-                    "Error in `doc.groupItems.createFromFile` with file `" 
-                    + fileList[i] + " `. Error: " + ex
+                	"Error in `doc.groupItems.createFromFile` with file `" 
+                	+ fileList[i] + " `. Error: " + ex
                 );
             }
 
-            /**
-             * Move relative to this artboards rulers
-             */
-            try {
-                svgFile.position = [
-                    Math.floor((CONFIG.ARTBOARD_WIDTH - svgFile.width) / 2),
-                    Math.floor((CONFIG.ARTBOARD_HEIGHT - svgFile.height) / 2) * -1
-                ];
-                if (typeof(svgFile.resize) == "function" && CONFIG.SCALE != 100) {
-                    svgFile.resize(CONFIG.SCALE, CONFIG.SCALE, true, true, true, true, CONFIG.SCALE);
-                }
-            }
-            catch(ex) {
-                try {
-                    svgFile.position = [0, 0];
-                }
-                catch(ex) {/*Exit Gracefully*/}
-            }
-
-            alignToNearestPixel(doc.selection);
-
         };
 
-        saveFileAsAi(
-            CONFIG.SRC_FOLDER.path + CONFIG.PATH_SEPATATOR + CONFIG.OUTPUT_FILENAME
-        );
+        saveFileAsAi(srcFolder.path + CONFIG.PATH_SEPATATOR + CONFIG.OUTPUT_FILENAME);
     };
+
+    try {
+        userInteractionLevel = originalInteractionLevel;
+    }
+    catch(ex) {/*Exit Gracefully*/}
 
 };
 
+/**
+ * Get all files in subfolders.
+ * @param srcFolder     The root folder from which to merge SVGs.
+ * @returns {Array}     Array of nested files.
+ */
 function getFilesInSubfolders( srcFolder ) {
 
     if ( ! srcFolder instanceof Folder) return;
@@ -480,12 +599,52 @@ function trim(str) {
 function logger(txt) {
 
     if (CONFIG.LOGGING == 0) return;
-    var file = new File(CONFIG.LOG_FILE_PATH);
-    file.open("e", "TEXT", "????");
-    file.seek(0,2);
-    $.os.search(/windows/i)  != -1 ? file.lineFeed = 'windows'  : file.lineFeed = 'macintosh';
-    file.writeln("[" + new Date().toUTCString() + "] " + txt);
-    file.close();
+    write_file(CONFIG.LOG_FILE_PATH, "[" + new Date().toUTCString() + "] " + txt, false);
+}
+
+/**
+ * Write a file to disc.
+ * @param path
+ * @param txt
+ * @param replace
+ */
+function write_file( path, txt, replace ) {
+    try {
+        var file = new File( path );
+        if (replace && file.exists) {
+            file.remove();
+            file = new File( path );
+        }
+        file.open("e", "TEXT", "????");
+        file.seek(0,2);
+        $.os.search(/windows/i)  != -1 ? file.lineFeed = 'windows'  : file.lineFeed = 'macintosh';
+        file.writeln(txt);
+        file.close();
+    }
+    catch(ex) {
+        try { file.close(); }
+        catch(ex) {/* Exit Gracefully*/}
+    }
+}
+
+/**
+ * Reads the contents of a file.
+ * @param {File} fp     A file object.
+ * @returns {string}
+ */
+function read_file(fp) {
+    var data = '';
+
+    try {
+        fp.open('r', undefined, undefined);
+        data = fp.read();
+        fp.close();
+    }
+    catch(e) {
+        try { fp.close(); }catch(e){}
+        /* Exit gracefully for now */
+    }
+    return data;
 }
 
 /**
