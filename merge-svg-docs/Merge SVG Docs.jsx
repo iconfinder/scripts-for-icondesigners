@@ -421,9 +421,9 @@ function showProgressBar(maxvalue) {
     return progress;
 }
 
-function updateProgress(progress) {
+function updateProgress(progress, maxvalue) {
     progress.pnl.progBar.value++;
-    progress.pnl.progBarLabel.text = progress.pnl.progBar.value+"%";
+    progress.pnl.progBarLabel.text = progress.pnl.progBar.value + " of " + maxvalue;
     $.sleep(10);
     progress.update();
     return progress;
@@ -504,8 +504,6 @@ function filesToArtboards() {
                 boardName = base + ' ' + boardName;
             }
 
-            logger("BOARD NAME: " + filterName(boardName));
-
             doc.artboards[i].name = filterName(boardName);
 
             /**
@@ -517,7 +515,7 @@ function filesToArtboards() {
             	    svgFile = doc.groupItems.createFromFile(f);
             	}
 
-            	updateProgress(progress);
+            	updateProgress(progress, CONFIG.ARTBOARD_COUNT);
 
                 /**
                  * Move relative to this artboards rulers
