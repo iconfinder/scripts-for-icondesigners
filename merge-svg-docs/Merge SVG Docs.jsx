@@ -1,46 +1,12 @@
-/**
- * The MIT License (MIT)
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- */
-/**
- *  Installation:
- *
- *      1. Copy this file to Illustrator > Presets > Scripting
- *      2. Restart Adobe Illustrator
- *      3. Go to File > Scripts > Merge SVG Docs
- *      4. Follow the prompts
- *
- *  Usage:
- *
- *      This script will import a folder of SVG files and merge them into a single document with
- *      the contents of each SVG file placed on a separate artboard. The artboard name will be set
- *      to the original SVG file's name without the file extension. Up to Adobe Illustrator 2015.3,
- *      it is only possible to import a maximum of 100 files since Illustrator only supports a
- *      maximum of 100 artboards.
- */
-
 #target Illustrator
 
 var originalInteractionLevel = userInteractionLevel;
 userInteractionLevel = UserInteractionLevel.DONTDISPLAYALERTS;
+
+/**
+ * Determine the HOME location for setting up the default configuration.
+ */
+var HOME_FOLDER = (new Folder($.getenv("HOME"))).absoluteURI;
 
 /**
  * Default configuration. Many of these values are over-written by the dialog.
@@ -64,15 +30,16 @@ var CONFIG = {
     ARTBOARD_HEIGHT     : 24,
     ARTBOARD_SPACING    : 24,
     ARTBOARD_ROWSxCOLS  : 10,
-    LOG_FILE_PATH       : "~/Downloads/ai-script-log.txt",
-    CONFIG_FILE_PATH    : "~/Downloads/ai-script-conf.json",
+    LOG_FILE_PATH       : HOME_FOLDER + "/ai-script-log.txt",
+    CONFIG_FILE_PATH    : HOME_FOLDER + "/ai-script-conf.json",
     LOGGING             : true,
     OUTPUT_FILENAME     : "merged-files.ai",
     SCALE               : 100,
-    ROOT                : "~/Documents",
+    ROOT                : HOME_FOLDER,
     SRC_FOLDER          : "",
     PATH_SEPATATOR      : "/",
-    SORT_ARTBOARDS      : true
+    SORT_ARTBOARDS      : true,
+    SYSTEM              : $.os.toLowerCase().indexOf("macintosh") != -1 ? "MAC" : "WINDOWS"
 }
 
 /**
@@ -103,7 +70,6 @@ var LANG = {
     LABEL_SORT_ARTBOARDS   : 'Sort Artboards?',
     PROGRESS               : 'Progress'
 }
-
 
 /**
  * Add Array.indexOf support if not supported natively.
@@ -195,17 +161,17 @@ function get( subject, key, _default ) {
 function getScreenSize() {
 
     try {
-		if (view = app.activeDocument.views[0] ) {
-			view.zoom = 1;
-			return {
-				left   : parseInt(view.bounds[0]),
-				top    : parseInt(view.bounds[1]),
-				right  : parseInt(view.bounds[2]),
-				bottom : parseInt(view.bounds[3]),
-				width  : parseInt(view.bounds[2]) - parseInt(view.bounds[0]),
-				height : parseInt(view.bounds[1]) - parseInt(view.bounds[3])
-			};
-		}
+        if (view = app.activeDocument.views[0] ) {
+            view.zoom = 1;
+            return {
+                left   : parseInt(view.bounds[0]),
+                top    : parseInt(view.bounds[1]),
+                right  : parseInt(view.bounds[2]),
+                bottom : parseInt(view.bounds[3]),
+                width  : parseInt(view.bounds[2]) - parseInt(view.bounds[0]),
+                height : parseInt(view.bounds[1]) - parseInt(view.bounds[3])
+            };
+        }
     }
     catch(ex){/*Exit Gracefully*/}
     return null;
@@ -436,6 +402,23 @@ function filesToArtboards() {
 
     var doc, fileList, i, srcFolder, mm, svgFile;
 
+    // var file = File.openDialog( "Please choose an AI file…" );
+    // var folder = new Folder(file.absoluteURI);
+    //
+    // var meta = new File(folder.path + "META");
+    //
+    // var metagz = meta.copy("~/Desktop/metagz.gz");
+    // metagz.execute();
+    //
+    // json = read_file(metagz.path + "/metagz");
+    //
+    // // alert(folder.getFiles());
+    // alert(json);
+
+    // var folder = Folder.selectDialog("");
+
+    // return;
+
     if (! doDisplayDialog()) {
         return;
     }
@@ -449,8 +432,7 @@ function filesToArtboards() {
      */
     fileList = getFilesInSubfolders(srcFolder);
 
-    logger("File count: " + fileList.length + "\n");
-    logger(fileList);
+    logger("File count: " + fileList.length + "\n" + fileList);
 
     /**
      * Make sure it has AI files in it…
@@ -504,18 +486,25 @@ function filesToArtboards() {
                 boardName = base + ' ' + boardName;
             }
 
-            doc.artboards[i].name = filterName(boardName);
+            boardName = filterName(boardName);
+
+            bits = boardName.split("--");
+            if (bits.length > 1 && ! isNaN(bits[0])) {
+                boardName = trim(bits[1]);
+            }
+
+            doc.artboards[i].name = boardName;
 
             /**
              * Create group from SVG
              */
             try {
                 var f = new File(fileList[i]);
-            	if (f.exists) {
-            	    svgFile = doc.groupItems.createFromFile(f);
-            	}
+                if (f.exists) {
+                    svgFile = doc.groupItems.createFromFile(f);
+                }
 
-            	updateProgress(progress, CONFIG.ARTBOARD_COUNT);
+                updateProgress(progress, CONFIG.ARTBOARD_COUNT);
 
                 /**
                  * Move relative to this artboards rulers
@@ -540,8 +529,8 @@ function filesToArtboards() {
             }
             catch(ex) {
                 logger(
-                	"Error in `doc.groupItems.createFromFile` with file `" 
-                	+ fileList[i] + " `. Error: " + ex
+                    "Error in `doc.groupItems.createFromFile` with file `" 
+                    + fileList[i] + " `. Error: " + ex
                 );
             }
         };
