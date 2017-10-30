@@ -426,9 +426,12 @@ function showProgressBar(maxvalue) {
     return progress;
 }
 
-function updateProgress(progress, maxvalue) {
+function updateProgress(progress, maxvalue, filename) {
+    
+    var message = "Importing file " + progress.pnl.progBar.value ;
+    message += " of " + maxvalue + ": `" + filename + "`";
+    progress.pnl.progBarLabel.text = message;
     progress.pnl.progBar.value++;
-    progress.pnl.progBarLabel.text = progress.pnl.progBar.value + " of " + maxvalue;
     $.sleep(10);
     progress.update();
     return progress;
@@ -501,11 +504,14 @@ function filesToArtboards() {
             doc.artboards.setActiveArtboardIndex(i);
 
             var bits = srcFolder.name.split('-');
-            var base = trim(bits.slice(1, bits.length).join('-'));
             var boardName = fileList[i].name.replace(".svg", "");
-
-            if (base != '') {
-                boardName = base + ' ' + boardName;
+            
+            /**
+             * If the file is in a subfolder, prepend the 
+             * subfolder name to the board name.
+             */
+            if (Folder(fileList[i].path).absoluteURI != Folder(srcFolder).absoluteURI) {
+                boardName = Folder(fileList[i].path).name + '-' + boardName;
             }
 
             boardName = filterName(boardName);
@@ -526,7 +532,7 @@ function filesToArtboards() {
                     svgFile = doc.groupItems.createFromFile(f);
                 }
 
-                updateProgress(progress, CONFIG.ARTBOARD_COUNT);
+                updateProgress(progress, CONFIG.ARTBOARD_COUNT, boardName + ".svg");
 
                 /**
                  * Move relative to this artboards rulers
