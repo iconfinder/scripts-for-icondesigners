@@ -402,23 +402,6 @@ function filesToArtboards() {
 
     var doc, fileList, i, srcFolder, mm, svgFile;
 
-    // var file = File.openDialog( "Please choose an AI file…" );
-    // var folder = new Folder(file.absoluteURI);
-    //
-    // var meta = new File(folder.path + "META");
-    //
-    // var metagz = meta.copy("~/Desktop/metagz.gz");
-    // metagz.execute();
-    //
-    // json = read_file(metagz.path + "/metagz");
-    //
-    // // alert(folder.getFiles());
-    // alert(json);
-
-    // var folder = Folder.selectDialog("");
-
-    // return;
-
     if (! doDisplayDialog()) {
         return;
     }
